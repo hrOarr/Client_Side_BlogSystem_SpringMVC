@@ -120,7 +120,7 @@ public class ArticleController {
 	public String addArticle(@ModelAttribute("articleDTO") ArticleDTO articleDTO, Model model) throws JsonProcessingException {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		// jackson json conversion from object
+		// json conversion from object
 		String jsonArticleDTO = new ObjectMapper().writeValueAsString(articleDTO);
 		//System.out.println(jsonArticleDTO);
 		
@@ -174,7 +174,7 @@ public class ArticleController {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		
-		// jackson json conversion from object
+		// json conversion from object
 		String jsonArticleDTO = new ObjectMapper().writeValueAsString(articleDTO);
 		
 		// implicit conversion of object to json with headers
