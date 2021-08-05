@@ -1,29 +1,29 @@
 package com.controller;
 
+import java.util.List;
+
 import javax.servlet.http.HttpSession;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.model.User;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
 
 @Controller
 @RequestMapping("/auth")
 public class AuthController {
 	
-	private static String url = "http://localhost:8081/SpringMVC_CRUD/api/v1/auth";
+	private static String auth_url = "http://localhost:8081/SpringMVC_CRUD/api/v1/auth";
 	
 	@ModelAttribute("user")
 	public User getUser() {
@@ -36,27 +36,22 @@ public class AuthController {
 	}
 	
 	@PostMapping("/login")
-	public String submitLogin(@ModelAttribute("user") User user, HttpSession session) throws JsonProcessingException {
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
+	public String userLogin(@ModelAttribute("user") User user, HttpSession session, Model model) throws JsonProcessingException {
 		// jackson json conversion from object
-		//String jsonUser = new ObjectMapper().writeValueAsString(user);
+		String jsonUser = new ObjectMapper().writeValueAsString(user);
 		
-		// implicit conversion of object to json with headers
-		HttpEntity<User> entity = new HttpEntity<>(user, headers);
-		
-		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<String> response = new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
-		
-		try {
-			response = restTemplate.postForEntity(url+"/login", entity, String.class);
-			User obj = new ObjectMapper().readValue(response.getBody(), User.class);
-			session.setAttribute("current_user", obj);
-		}
-		catch (Exception e) {
-			System.out.println(response);
+		Client client = Client.create();
+		WebResource resource = client.resource(auth_url);
+		ClientResponse response = resource.path("/login")
+				                  .type("application/json").post(ClientResponse.class, jsonUser);
+		String resp = response.getEntity(String.class);
+		if(response.getStatus()==400) {
+			List<String> errors = new ObjectMapper().readValue(resp, new TypeReference<List<String>>() {});
+			model.addAttribute("errors", errors);
 			return "auth/login_form";
 		}
+		session.setAttribute("current_user", new ObjectMapper().readValue(resp, User.class));
+		System.out.println(session.getAttribute("current_user"));
 		
 		return "redirect:/";
 	}
@@ -67,27 +62,22 @@ public class AuthController {
 	}
 	
 	@PostMapping("/register")
-	public String submitRegister(@ModelAttribute("user") User user, HttpSession session) throws JsonProcessingException {
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
+	public String userRegister(@ModelAttribute("user") User user, HttpSession session, Model model) throws JsonProcessingException {
 		// jackson json conversion from object
-		// String jsonUser = new ObjectMapper().writeValueAsString(user);
-		
-		// implicit conversion of object to json with headers
-		HttpEntity<User> entity = new HttpEntity<>(user, headers);
-		
-		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<String> response = new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
-		
-		try {
-			response = restTemplate.postForEntity(url+"/register", entity, String.class);
-			User obj = new ObjectMapper().readValue(response.getBody(), User.class);
-			session.setAttribute("current_user", obj);
-		}
-		catch (Exception e) {
-			System.out.println(response);
+		String jsonUser = new ObjectMapper().writeValueAsString(user);
+		Client client = Client.create();
+		WebResource resource = client.resource(auth_url);
+		ClientResponse response = resource.path("/register")
+				                  .type("application/json").post(ClientResponse.class, jsonUser);
+		String resp = response.getEntity(String.class);
+		if(response.getStatus()==400) {
+			List<String> errors = new ObjectMapper().readValue(resp, new TypeReference<List<String>>() {});
+			model.addAttribute("errors", errors);
 			return "auth/register_form";
 		}
+		session.setAttribute("current_user", new ObjectMapper().readValue(resp, User.class));
+		System.out.println(session.getAttribute("current_user"));
+		
 		return "redirect:/";
 	}
 	

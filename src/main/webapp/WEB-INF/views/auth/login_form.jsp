@@ -35,7 +35,11 @@
 	     
 	     <h1 class="font-medium text-center text-xl mb-4">Login</h1>
 	     
-	     <h3 class="text-red-400 text-center mb-2"><c:out value="${errors}" /></h3>
+	     <h3 class="text-red-400 text-center mb-2">
+	       <c:forEach var="err" items="${errors}">
+	         <c:out value="${err}" /><br>
+	       </c:forEach>
+	     </h3>
 	     
 	     <form:form action="${pageContext.servletContext.contextPath}/auth/login" method="POST" modelAttribute="user">
     	    
