@@ -42,7 +42,7 @@
 	       </c:forEach>
 	     </h3>
 	     
-	     <form:form action="${pageContext.servletContext.contextPath}/auth/register" method="POST" modelAttribute="user">
+	     <form:form action="${pageContext.servletContext.contextPath}/auth/register" method="POST" modelAttribute="registerDTO">
     	    
     	    <div class="relative mb-2">
               <form:input path="name" placeholder="Enter name" class="py-1 px-3 w-full bg-white rounded border border-gray-300 outline-none "/>

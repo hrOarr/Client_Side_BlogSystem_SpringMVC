@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.model.LoginDTO;
+import com.model.RegisterDTO;
 import com.model.User;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -25,9 +27,14 @@ public class AuthController {
 	
 	private static String auth_url = "http://localhost:8081/SpringMVC_CRUD/api/v1/auth";
 	
-	@ModelAttribute("user")
-	public User getUser() {
-		return new User(); 
+	@ModelAttribute("loginDTO")
+	public LoginDTO getLoginDTO() {
+		return new LoginDTO(); 
+	}
+	
+	@ModelAttribute("registerDTO")
+	public RegisterDTO getRegisterDTO() {
+		return new RegisterDTO();
 	}
 	
 	@GetMapping("/login")
@@ -37,14 +44,14 @@ public class AuthController {
 	}
 	
 	@PostMapping("/login")
-	public String userLogin(@ModelAttribute("user") User user, HttpSession session, Model model) throws JsonProcessingException {
+	public String userLogin(@ModelAttribute("loginDTO") LoginDTO loginDTO, HttpSession session, Model model) throws JsonProcessingException {
 		// json conversion from object
-		String jsonUser = new ObjectMapper().writeValueAsString(user);
+		String jsonLoginDTO = new ObjectMapper().writeValueAsString(loginDTO);
 		
 		Client client = Client.create();
 		WebResource resource = client.resource(auth_url);
 		ClientResponse response = resource.path("/login")
-				                  .type("application/json").post(ClientResponse.class, jsonUser);
+				                  .type("application/json").post(ClientResponse.class, jsonLoginDTO);
 		String resp = response.getEntity(String.class);
 		if(response.getStatus()==400) {
 			List<String> errors = new ObjectMapper().readValue(resp, new TypeReference<List<String>>() {});
@@ -63,13 +70,13 @@ public class AuthController {
 	}
 	
 	@PostMapping("/register")
-	public String userRegister(@ModelAttribute("user") User user, HttpSession session, Model model) throws JsonProcessingException {
+	public String userRegister(@ModelAttribute("registerDTO") RegisterDTO registerDTO, HttpSession session, Model model) throws JsonProcessingException {
 		// json conversion from object
-		String jsonUser = new ObjectMapper().writeValueAsString(user);
+		String jsonRegisterDTO = new ObjectMapper().writeValueAsString(registerDTO);
 		Client client = Client.create();
 		WebResource resource = client.resource(auth_url);
 		ClientResponse response = resource.path("/register")
-				                  .type("application/json").post(ClientResponse.class, jsonUser);
+				                  .type("application/json").post(ClientResponse.class, jsonRegisterDTO);
 		String resp = response.getEntity(String.class);
 		if(response.getStatus()==400) {
 			List<String> errors = new ObjectMapper().readValue(resp, new TypeReference<List<String>>() {});
