@@ -32,12 +32,13 @@ public class AuthController {
 	
 	@GetMapping("/login")
 	public String login(Model model) {
+		System.out.println(model.getAttribute("user"));
 		return "auth/login_form";
 	}
 	
 	@PostMapping("/login")
 	public String userLogin(@ModelAttribute("user") User user, HttpSession session, Model model) throws JsonProcessingException {
-		// jackson json conversion from object
+		// json conversion from object
 		String jsonUser = new ObjectMapper().writeValueAsString(user);
 		
 		Client client = Client.create();
@@ -63,7 +64,7 @@ public class AuthController {
 	
 	@PostMapping("/register")
 	public String userRegister(@ModelAttribute("user") User user, HttpSession session, Model model) throws JsonProcessingException {
-		// jackson json conversion from object
+		// json conversion from object
 		String jsonUser = new ObjectMapper().writeValueAsString(user);
 		Client client = Client.create();
 		WebResource resource = client.resource(auth_url);
