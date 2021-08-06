@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +27,7 @@ import com.sun.jersey.api.client.WebResource;
 public class AuthController {
 	
 	private static String auth_url = "http://localhost:8081/SpringMVC_CRUD/api/v1/auth";
+	private static final Logger logger = Logger.getLogger(AuthController.class);
 	
 	@ModelAttribute("loginDTO")
 	public LoginDTO getLoginDTO() {
@@ -39,7 +41,6 @@ public class AuthController {
 	
 	@GetMapping("/login")
 	public String login(Model model) {
-		System.out.println(model.getAttribute("user"));
 		return "auth/login_form";
 	}
 	
@@ -59,7 +60,7 @@ public class AuthController {
 			return "auth/login_form";
 		}
 		session.setAttribute("current_user", new ObjectMapper().readValue(resp, User.class));
-		System.out.println(session.getAttribute("current_user"));
+		logger.debug(session.getAttribute("current_user"));
 		
 		return "redirect:/";
 	}
@@ -84,7 +85,7 @@ public class AuthController {
 			return "auth/register_form";
 		}
 		session.setAttribute("current_user", new ObjectMapper().readValue(resp, User.class));
-		System.out.println(session.getAttribute("current_user"));
+		logger.debug(session.getAttribute("current_user"));
 		
 		return "redirect:/";
 	}

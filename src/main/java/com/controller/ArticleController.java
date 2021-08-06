@@ -2,6 +2,8 @@ package com.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.log4j.Logger;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -32,6 +34,7 @@ public class ArticleController {
 	
 	private static String article_uri = "http://localhost:8081/SpringMVC_CRUD/api/v1/articles";
 	private static String tag_uri = "http://localhost:8081/SpringMVC_CRUD/api/v1/tags";
+	private static final Logger logger = Logger.getLogger(ArticleController.class);
 	
 	private static Convertor convertor = new Convertor();
 	
@@ -41,6 +44,8 @@ public class ArticleController {
 	public String allArticles(Model model) throws JsonMappingException, JsonProcessingException {
 		List<Article> articles = new ArrayList<Article>();
 		List<Tag> tags = new ArrayList<Tag>();
+		
+		logger.debug("listening to allArticles method...");
 		
 //		RestTemplate restTemplate = new RestTemplate();
 //		
@@ -69,6 +74,7 @@ public class ArticleController {
 		String responseTag = response.getEntity(String.class);
 		tags = objectMapper.readValue(responseTag, new TypeReference<List<Tag>>() {});
 		
+		logger.debug("articles retrieval successful...");
 		model.addAttribute("articles", articles);
 		model.addAttribute("tags", tags);
 		return "articles/article_list";
@@ -94,9 +100,11 @@ public class ArticleController {
 			String responseArticle = response.getEntity(String.class);
 			Article article = new ObjectMapper().readValue(responseArticle, Article.class);
 			
+			logger.debug("specific article retrieval successful!");
 			model.addAttribute("article", article);
 			return "articles/show_article";
 		} catch (Exception e) {
+			logger.error("Exception occurred in method[showArticle]");
 			model.addAttribute("msg", "Resource Not Found");
 			return "error";
 		}
@@ -122,11 +130,10 @@ public class ArticleController {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		// json conversion from object
 		String jsonArticleDTO = new ObjectMapper().writeValueAsString(articleDTO);
-		//System.out.println(jsonArticleDTO);
+		logger.debug(jsonArticleDTO);
 		
 		// implicit conversion of object to json with headers
 		//HttpEntity<String> entity = new HttpEntity<>(jsonArticleDTO, headers);
-		//System.out.println(entity);
 		Client client = Client.create();
 		WebResource resource = client.resource(article_uri);
 		ClientResponse response = resource.path("/add").type("application/json").post(ClientResponse.class, jsonArticleDTO);
@@ -136,8 +143,11 @@ public class ArticleController {
 			List<String> errors = new ObjectMapper().readValue(resp, new TypeReference<List<String>>() {});
 			model.addAttribute("errors", errors);
 			model.addAttribute("type", "add");
+			logger.error("bad request(400) in method[addArticle]");
 			return "articles/show_form";
 		}
+		
+		logger.debug("Article added successfully!!");
 		
 		return "redirect:/articles";
 	}
@@ -189,6 +199,8 @@ public class ArticleController {
 			List<String> errors = new ObjectMapper().readValue(resp, new TypeReference<List<String>>() {});
 			model.addAttribute("errors", errors);
 			model.addAttribute("type", "edit");
+			
+			logger.error("bad request(400) in method[editArticle]");
 			return "articles/show_form";
 		}
 		
@@ -245,6 +257,7 @@ public class ArticleController {
 		
 		if(response.getStatus()!=200) {
 			//
+			logger.error("Error in deleting article[deleteArticle]");
 		}
 		
 		return "redirect:/articles";
